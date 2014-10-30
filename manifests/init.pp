@@ -13,6 +13,7 @@ class mailserver (
   $message_size_limit    = '10485760',
   $default_quota         = '10485760',
   $db                    = 'yes',
+  $dbhost                = 'localhost',
   $dbname                = 'mail',
   $dbuser                = undef,
   $dbpassword            = undef,
@@ -46,20 +47,11 @@ class mailserver (
     	dbname=>$dbname,
     }
 
-    include postgresql::server
-
-    postgresql::server::db { $dbname:
-      user     => $dbuser,
-      password => $dbpassword
-    }
-
     postgresql::validate_db_connection { "public.connection-validate":
-      database_host     => 'localhost',
+      database_host     => $dbhost,
       database_username => $dbuser,
       database_password => $dbpassword,
       database_name     => $dbname,
-      require           => Postgresql::Server::Db[$dbname],
-      before            => Postgresql_psql["${dbname}-init-database"],
     }
 
     postgresql_psql { "${dbname}-init-database":
@@ -100,6 +92,7 @@ class mailserver (
       dbname     => $dbname,
       dbpassword => $dbpassword,
       dbuser     => $dbuser,
+      hosts      => [$dbhost],
     }
 
 
